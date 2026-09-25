@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { appName } from "../config";
+import MediaPlayer from "../components/MediaPlayer";
 import { useNavigate, useParams } from "react-router-dom";
 import {
   deleteRoom,
@@ -8,7 +9,6 @@ import {
   joinRoom,
   listMessages,
   markRoomRead,
-  mediaUrl,
   openRoomSocket,
   renameRoom,
   type Message
@@ -245,7 +245,7 @@ export default function Room({ onEnter, onLeave }: RoomProps) {
                 )}
 
                 {message.kind === "media" && message.mediaKey ? (
-                  <video className="mt-1 rounded-2xl" src={mediaUrl(message.mediaKey)} controls preload="none" playsInline />
+                  <MediaPlayer className="mt-1 rounded-2xl" mediaKey={message.mediaKey} />
                 ) : (
                   <div className="whitespace-pre-wrap break-words">{message.body}</div>
                 )}

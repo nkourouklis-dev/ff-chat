@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { deleteUpdate, getUser, listUpdates, mediaUrl, type Update } from "../services/api";
+import { deleteFromDrive, driveFileId, isDriveKey } from "../services/drive";
+import MediaPlayer from "../components/MediaPlayer";
 
 function timeAgo(ms: number): string {
   const mins = Math.floor((Date.now() - ms) / 60000);
@@ -36,6 +38,7 @@ export default function Updates() {
 
     try {
       await deleteUpdate(update.id);
+      if (isDriveKey(update.mediaKey)) await deleteFromDrive(update.mediaKey);
     } catch {
       alert("Κάτι πήγε στραβά.");
       setUpdates(await listUpdates());
@@ -78,7 +81,7 @@ export default function Updates() {
         </header>
 
         <div className="flex flex-1 items-center justify-center">
-          <video className="max-h-full w-full" src={mediaUrl(active.mediaKey)} controls autoPlay playsInline />
+          <MediaPlayer className="max-h-full w-full" mediaKey={active.mediaKey} autoPlay />
         </div>
 
         {active.caption && <p className="p-5 text-center text-lg">{active.caption}</p>}
@@ -121,13 +124,23 @@ export default function Updates() {
             onClick={() => setActive(update)}
             className="relative aspect-[3/4] overflow-hidden rounded-3xl bg-white/5 text-left active:scale-95 transition"
           >
-            <video
-              className="absolute inset-0 h-full w-full object-cover opacity-80"
-              src={`${mediaUrl(update.mediaKey)}#t=0.5`}
-              preload="metadata"
-              muted
-              playsInline
-            />
+            {isDriveKey(update.mediaKey) ? (
+              <img
+                className="absolute inset-0 h-full w-full object-cover opacity-80"
+                src={`https://drive.google.com/thumbnail?id=${driveFileId(update.mediaKey)}&sz=w400`}
+                alt=""
+                referrerPolicy="no-referrer"
+                onError={(e) => (e.currentTarget.style.display = "none")}
+              />
+            ) : (
+              <video
+                className="absolute inset-0 h-full w-full object-cover opacity-80"
+                src={`${mediaUrl(update.mediaKey)}#t=0.5`}
+                preload="metadata"
+                muted
+                playsInline
+              />
+            )}
             <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-transparent to-black/30" />
 
             <div className="absolute inset-x-0 top-0 flex items-center gap-2 p-3">

@@ -1,4 +1,5 @@
 import { apiBaseUrl, wsBaseUrl } from "../config";
+import { driveEnabled, uploadToDrive } from "./drive";
 
 const TOKEN_KEY = "liakos.token";
 const USER_KEY = "liakos.user";
@@ -132,6 +133,7 @@ export const markRoomRead = (roomId: string) =>
 /* ---------------------------------- Media ---------------------------------- */
 
 export async function uploadMedia(blob: Blob): Promise<string> {
+  if (driveEnabled) return uploadToDrive(blob);
   const data = await request<{ key: string }>("/api/media", {
     method: "POST",
     body: blob,
