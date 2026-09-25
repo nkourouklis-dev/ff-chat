@@ -1,26 +1,54 @@
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { getUser } from "../services/api";
+import { getUser, getWorkspace, type Workspace } from "../services/api";
+import { appName } from "../config";
 
 const actions = [
   { path: "/chats", icon: "💬", title: "Chat", text: "Μίλα με την παρέα", color: "from-violet-500 to-indigo-600" },
   { path: "/camera", icon: "🎥", title: "Video", text: "Τράβα και μοιράσου", color: "from-pink-500 to-rose-600" },
   { path: "/updates", icon: "📣", title: "Feed", text: "Δες τα νέα της παρέας", color: "from-amber-400 to-orange-600" },
   { path: "/games", icon: "🎮", title: "Games", text: "Παίξε και διασκέδασε", color: "from-emerald-400 to-teal-600" },
-  { path: "/ai", icon: "🤖", title: "AI", text: "Ρώτα τον Λιάκο", color: "from-sky-400 to-blue-600" }
+  { path: "/ai", icon: "🤖", title: "AI", text: "Ο δικός σου AI βοηθός", color: "from-sky-400 to-blue-600" }
 ];
 
 export default function Home({ unreadTotal = 0 }: { unreadTotal?: number }) {
   const navigate = useNavigate();
   const user = getUser();
+  const [workspace, setWorkspace] = useState<Workspace | null>(null);
+  const [copied, setCopied] = useState(false);
+
+  useEffect(() => {
+    getWorkspace().then(setWorkspace).catch(() => undefined);
+  }, []);
+
+  async function invite() {
+    if (!workspace) return;
+    const url = `${window.location.origin}/login?join=${workspace.inviteCode}`;
+    if (navigator.share) {
+      navigator.share({ title: workspace.name, url }).catch(() => undefined);
+      return;
+    }
+    await navigator.clipboard.writeText(url).catch(() => undefined);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  }
 
   return (
     <main className="page-shell">
       <header className="mb-5">
-        <p className="text-sm font-semibold text-liakos-500">LIAKOS CHAT</p>
+        <p className="text-sm font-semibold text-liakos-500">{(workspace?.name ?? appName).toUpperCase()}</p>
         <h1 className="mt-1 text-[clamp(1.75rem,7vw,2.5rem)] font-black leading-tight">
           Γεια σου, {user?.displayName ?? "φίλε"} 👋
         </h1>
         <p className="mt-1 text-base text-white/55">Τι θέλεις να κάνεις;</p>
+        {workspace && (
+          <button
+            onClick={invite}
+            className="mt-3 rounded-2xl bg-liakos-500/20 px-4 py-2 text-sm font-semibold text-liakos-500 active:scale-95 transition"
+          >
+            {copied ? "Το link αντιγράφηκε ✓" : "➕ Κάλεσε κόσμο στην παρέα"}
+          </button>
+        )}
       </header>
 
       {unreadTotal > 0 && (

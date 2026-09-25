@@ -37,15 +37,33 @@ async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
   return (await response.json()) as T;
 }
 
-export async function login(name: string): Promise<User> {
+/** Νέα οικογένεια: workspaceName. Είσοδος σε υπάρχουσα: inviteCode ή roomId. */
+export interface LoginInput {
+  name: string;
+  workspaceName?: string;
+  inviteCode?: string;
+  roomId?: string;
+}
+
+export async function login(input: LoginInput): Promise<User> {
   const data = await request<{ token: string; user: User }>("/api/auth/login", {
     method: "POST",
-    body: JSON.stringify({ name })
+    body: JSON.stringify(input)
   });
   localStorage.setItem(TOKEN_KEY, data.token);
   localStorage.setItem(USER_KEY, JSON.stringify(data.user));
   return data.user;
 }
+
+/* -------------------------------- Workspace -------------------------------- */
+
+export interface Workspace {
+  name: string;
+  inviteCode: string;
+  role: "admin" | "member";
+}
+
+export const getWorkspace = () => request<Workspace>("/api/workspace");
 
 /* ---------------------------------- Rooms --------------------------------- */
 
@@ -148,6 +166,37 @@ export const deleteUpdate = (id: string) =>
 
 export const askAi = (messages: { role: string; content: string }[]) =>
   request<{ reply: string }>("/api/ai/chat", { method: "POST", body: JSON.stringify({ messages }) });
+
+export type AiProvider = "gemini" | "openai";
+
+export interface AiSettings {
+  provider: AiProvider;
+  model: string;
+  botName: string;
+  hasKey: boolean;
+  builtinAvailable: boolean;
+  defaultModels: Record<AiProvider, string>;
+}
+
+export const getAiSettings = () => request<AiSettings>("/api/ai/settings");
+
+export const saveAiSettings = (input: { provider: AiProvider; model: string; botName: string; apiKey: string }) =>
+  request<{ ok: boolean }>("/api/ai/settings", { method: "PUT", body: JSON.stringify(input) });
+
+export const deleteAiSettings = () => request<{ ok: boolean }>("/api/ai/settings", { method: "DELETE" });
+
+/** Το request() πετάει `${status}: ${body}`. Βγάζει το μήνυμα του server αν υπάρχει. */
+export function errorMessage(error: unknown, fallback: string): string {
+  const text = error instanceof Error ? error.message : "";
+  const json = text.slice(text.indexOf(":") + 1).trim();
+  try {
+    const parsed = JSON.parse(json) as { message?: string };
+    if (parsed.message) return parsed.message;
+  } catch {
+    /* όχι JSON */
+  }
+  return fallback;
+}
 
 export function openRoomSocket(roomId: string): WebSocket {
   return new WebSocket(`${wsBaseUrl}/ws/${roomId}?token=${encodeURIComponent(getToken() ?? "")}`);

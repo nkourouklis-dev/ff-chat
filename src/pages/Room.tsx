@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { appName } from "../config";
 import { useNavigate, useParams } from "react-router-dom";
 import {
   deleteRoom,
@@ -112,7 +113,7 @@ export default function Room({ onEnter, onLeave }: RoomProps) {
 
   function shareLink() {
     const url = `${location.origin}/room/${roomId}`;
-    if (navigator.share) navigator.share({ title: "Liakos Chat", url });
+    if (navigator.share) navigator.share({ title: appName, url });
     else {
       navigator.clipboard.writeText(url);
       alert("Το link αντιγράφηκε!");

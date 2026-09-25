@@ -4,6 +4,7 @@ export interface Env {
   AI: Ai;
   ROOM: DurableObjectNamespace;
   APP_NAME: string;
+  AI_NAME: string;
   ALLOWED_ORIGIN_SUFFIX: string;
   JWT_SECRET: string;
 }

@@ -4,7 +4,8 @@ compatibility_date = "2026-08-01"
 compatibility_flags = ["nodejs_compat"]
 
 [vars]
-APP_NAME = "Liakos Chat"
+APP_NAME = "F&F Chat"
+AI_NAME = "Λιάκος"
 ALLOWED_ORIGIN_SUFFIX = ".pages.dev"
 
 [dev]
