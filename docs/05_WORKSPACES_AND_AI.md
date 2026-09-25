@@ -8,6 +8,27 @@
 κανένα account και δεν κάνουν καμία εγκατάσταση: ανοίγουν το link και γράφουν όνομα.
 Ό,τι κοστίζει ξεχωριστά πηγαίνει στον ίδιο τον χρήστη (AI key, Google Drive), και ο ιδιοκτήτης προστατεύεται με όρια (βλ. παρακάτω).
 
+**Δύο ξεχωριστά deployments από τον ίδιο κώδικα:**
+
+| | liakos-chat | ff-chat |
+|---|---|---|
+| Για ποιον | η αρχική παρέα του ιδιοκτήτη | οι υπόλοιπες οικογένειες |
+| Worker | `liakos-chat.nkourouklis.workers.dev` | `ff-chat.nkourouklis.workers.dev` |
+| Site | `liakos-chat.pages.dev` | `ff-chat.pages.dev` |
+| Βάση / bucket | `liakos_db` / `liakos-media` | `ff_db` / `ff-media` |
+| Ρυθμίσεις | `wrangler.toml` | `wrangler.ff.toml` |
+| Ενσωματωμένος AI (Λιάκος) | ναι (Workers AI) | **όχι** (δεν υπάρχει καν `[ai]` binding) |
+
+Deploy του ff-chat:
+```
+npm run ff:db          # migrations στο ff_db
+npm run ff:worker      # worker
+VITE_API_BASE_URL=https://ff-chat.nkourouklis.workers.dev npx vite build --outDir dist-ff --emptyOutDir
+npx wrangler pages deploy dist-ff --project-name=ff-chat --branch=main
+```
+Το `JWT_SECRET` του ff-chat είναι ξεχωριστό (`wrangler secret put JWT_SECRET --config wrangler.ff.toml`).
+Στη βάση του ff-chat υπάρχει και η γραμμή `workspaces.id='legacy'` που φτιάχνει η migration 0006. Κανείς δεν ανήκει σε αυτή και μετράει ως μία από τις `MAX_WORKSPACES`.
+
 **Αποφάσεις που πάρθηκαν:**
 - Δοκιμάστηκε το Google Drive ως βάση δεδομένων χωρίς server (POC): η ανάγνωση αρχείων άλλου χρήστη με API key δουλεύει
   (~0,6 s), αλλά ένα μήνυμα φτάνει σε 2-7 s, η εγγραφή κοστίζει ~1,5 s και οι 30 ταυτόχρονες αναγνώσεις εξυπηρετήθηκαν σειριακά

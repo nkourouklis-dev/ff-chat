@@ -1,0 +1,34 @@
+# F&F Chat: ξεχωριστό deployment για τις υπόλοιπες οικογένειες.
+# Δεν μοιράζεται βάση, bucket ή δεδομένα με το liakos-chat.
+# Δεν έχει [ai] binding: ο ενσωματωμένος AI δεν υπάρχει, κάθε χρήστης φέρνει το δικό του API key.
+name = "ff-chat"
+main = "worker/index.ts"
+compatibility_date = "2026-08-01"
+compatibility_flags = ["nodejs_compat"]
+
+[vars]
+APP_NAME = "F&F Chat"
+AI_NAME = "Buddy"
+ALLOWED_ORIGIN_SUFFIX = ".pages.dev"
+MAX_WORKSPACES = "20"
+MAX_MEMBERS_PER_WORKSPACE = "25"
+MAX_MESSAGES_PER_DAY = "500"
+MAX_UPLOAD_MB = "30"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "ff_db"
+database_id = "970d7c8c-a304-4430-b63b-4dc3a149cedb"
+migrations_dir = "migrations"
+
+[[r2_buckets]]
+binding = "MEDIA"
+bucket_name = "ff-media"
+
+[[durable_objects.bindings]]
+name = "ROOM"
+class_name = "ChatRoom"
+
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["ChatRoom"]

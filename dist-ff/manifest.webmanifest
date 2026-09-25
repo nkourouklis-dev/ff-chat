@@ -1,0 +1,9 @@
+{
+  "name": "F&F Chat",
+  "short_name": "F&F",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#140f2e",
+  "theme_color": "#140f2e",
+  "icons": []
+}

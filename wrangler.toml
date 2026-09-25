@@ -8,7 +8,7 @@ APP_NAME = "F&F Chat"
 AI_NAME = "Λιάκος"
 # Όρια χρήσης (free tier). Άλλαξέ τα εδώ.
 MAX_WORKSPACES = "20"
-MAX_MEMBERS_PER_WORKSPACE = "25"
+MAX_MEMBERS_PER_WORKSPACE = "60"
 MAX_MESSAGES_PER_DAY = "500"
 MAX_UPLOAD_MB = "30"
 ALLOWED_ORIGIN_SUFFIX = ".pages.dev"

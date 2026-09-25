@@ -10,7 +10,9 @@
     "worker:dev": "wrangler dev",
     "worker:deploy": "wrangler deploy",
     "db:local": "wrangler d1 migrations apply liakos_db --local",
-    "db:remote": "wrangler d1 migrations apply liakos_db --remote"
+    "db:remote": "wrangler d1 migrations apply liakos_db --remote",
+    "ff:db": "wrangler d1 migrations apply ff_db --remote --config wrangler.ff.toml",
+    "ff:worker": "wrangler deploy --config wrangler.ff.toml"
   },
   "dependencies": {
     "hono": "^4.6.14",
