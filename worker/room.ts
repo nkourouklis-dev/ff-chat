@@ -108,6 +108,18 @@ export class ChatRoom {
     }
 
     if (payload.type === "message") {
+      const body = typeof payload.body === "string" ? payload.body.slice(0, 4000) : undefined;
+
+      // Ημερήσιο όριο μηνυμάτων ανά χρήστη (προστασία του free tier).
+      const dayLimit = Number(this.env.MAX_MESSAGES_PER_DAY) || 500;
+      const sent = await this.env.DB.prepare("SELECT COUNT(*) AS n FROM messages WHERE user_id = ? AND created_at > ?")
+        .bind(meta.userId, Date.now() - 24 * 3600_000)
+        .first<{ n: number }>();
+      if ((sent?.n ?? 0) >= dayLimit) {
+        ws.send(JSON.stringify({ type: "error", message: "Έφτασες το ημερήσιο όριο μηνυμάτων. Δοκίμασε αύριο." } satisfies WsEvent));
+        return;
+      }
+
       const event: WsEvent = {
         type: "message",
         id: crypto.randomUUID(),
@@ -116,7 +128,7 @@ export class ChatRoom {
         handle: meta.handle,
         name: meta.name,
         kind: payload.kind ?? "text",
-        body: payload.body,
+        body,
         mediaKey: payload.mediaKey,
         createdAt: Date.now()
       };

@@ -5,6 +5,11 @@ export interface Env {
   ROOM: DurableObjectNamespace;
   APP_NAME: string;
   AI_NAME: string;
+  // Όρια για να μένει η υπηρεσία μέσα στο free tier.
+  MAX_WORKSPACES: string;
+  MAX_MEMBERS_PER_WORKSPACE: string;
+  MAX_MESSAGES_PER_DAY: string;
+  MAX_UPLOAD_MB: string;
   ALLOWED_ORIGIN_SUFFIX: string;
   JWT_SECRET: string;
 }

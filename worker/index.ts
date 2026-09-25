@@ -113,10 +113,22 @@ function slugify(name: string): string {
   return base || "friend";
 }
 
+const limit = (value: string | undefined, fallback: number) => {
+  const n = Number(value);
+  return Number.isFinite(n) && n > 0 ? n : fallback;
+};
+
 function makeInviteCode(): string {
   const alphabet = "abcdefghjkmnpqrstuvwxyz23456789";
   const bytes = crypto.getRandomValues(new Uint8Array(10));
   return Array.from(bytes, (b) => alphabet[b % alphabet.length]).join("");
+}
+
+async function workspaceIsFull(env: Env, workspaceId: string): Promise<boolean> {
+  const row = await env.DB.prepare("SELECT COUNT(*) AS n FROM users WHERE workspace_id = ?")
+    .bind(workspaceId)
+    .first<{ n: number }>();
+  return (row?.n ?? 0) >= limit(env.MAX_MEMBERS_PER_WORKSPACE, 25);
 }
 
 // Νέα οικογένεια: workspaceName -> ο χρήστης γίνεται admin.
@@ -137,6 +149,8 @@ app.post("/api/auth/login", async (c) => {
       .first<{ id: string }>();
     if (!ws) return c.json({ error: "invalid_invite" }, 404);
     workspaceId = ws.id;
+    const full = await workspaceIsFull(c.env, workspaceId);
+    if (full) return c.json({ error: "workspace_full" }, 403);
   } else if (body.roomId) {
     const row = await c.env.DB.prepare(
       "SELECT u.workspace_id AS workspaceId FROM rooms r JOIN users u ON u.id = r.created_by WHERE r.id = ?"
@@ -145,9 +159,13 @@ app.post("/api/auth/login", async (c) => {
       .first<{ workspaceId: string | null }>();
     if (!row?.workspaceId) return c.json({ error: "invalid_invite" }, 404);
     workspaceId = row.workspaceId;
+    if (await workspaceIsFull(c.env, workspaceId)) return c.json({ error: "workspace_full" }, 403);
   } else {
     const workspaceName = (body.workspaceName ?? "").trim().replace(/\s+/g, " ").slice(0, 40);
     if (workspaceName.length < 2) return c.json({ error: "workspace_required" }, 400);
+    const total = await c.env.DB.prepare("SELECT COUNT(*) AS n FROM workspaces").first<{ n: number }>();
+    if ((total?.n ?? 0) >= limit(c.env.MAX_WORKSPACES, 20)) return c.json({ error: "workspaces_full" }, 403);
+
     workspaceId = crypto.randomUUID();
     role = "admin";
     statements.push(
@@ -376,6 +394,8 @@ app.post("/api/rooms/:id/read", requireSession, async (c) => {
 /* ---------------------------------- Media ---------------------------------- */
 
 app.post("/api/media", requireSession, async (c) => {
+  const maxBytes = limit(c.env.MAX_UPLOAD_MB, 30) * 1024 * 1024;
+  if (Number(c.req.header("Content-Length") ?? 0) > maxBytes) return c.json({ error: "too_large" }, 413);
   const contentType = c.req.header("Content-Type") ?? "application/octet-stream";
   const ext = contentType.includes("webm") ? "webm" : contentType.includes("mp4") ? "mp4" : "bin";
   const key = `${c.get("session").userId}/${crypto.randomUUID()}.${ext}`;

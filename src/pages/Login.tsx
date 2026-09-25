@@ -28,8 +28,16 @@ export default function Login() {
       await login({ name, workspaceName: isInvite ? undefined : workspaceName, inviteCode, roomId });
       navigate(from, { replace: true });
     } catch (e) {
-      const invalid = e instanceof Error && e.message.includes("invalid_invite");
-      setError(invalid ? "Το link πρόσκλησης δεν ισχύει πια." : "Δεν έγινε η σύνδεση. Δοκίμασε ξανά.");
+      const text = e instanceof Error ? e.message : "";
+      setError(
+        text.includes("invalid_invite")
+          ? "Το link πρόσκλησης δεν ισχύει πια."
+          : text.includes("workspace_full")
+            ? "Η παρέα έχει γεμίσει. Ζήτα από τον admin να κάνει χώρο."
+            : text.includes("workspaces_full")
+              ? "Η υπηρεσία δεν δέχεται προς το παρόν νέες παρέες."
+              : "Δεν έγινε η σύνδεση. Δοκίμασε ξανά."
+      );
     } finally {
       setBusy(false);
     }
