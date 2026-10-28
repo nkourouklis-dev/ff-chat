@@ -7,10 +7,6 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "preview": "vite preview",
-    "worker:dev": "wrangler dev",
-    "worker:deploy": "wrangler deploy",
-    "db:local": "wrangler d1 migrations apply liakos_db --local",
-    "db:remote": "wrangler d1 migrations apply liakos_db --remote",
     "ff:db": "wrangler d1 migrations apply ff_db --remote --config wrangler.ff.toml",
     "ff:worker": "wrangler deploy --config wrangler.ff.toml",
     "ff:web": "tsc -b && vite build --mode ff --outDir dist-ff && wrangler pages deploy dist-ff --project-name=ff-chat --branch=main"

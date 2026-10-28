@@ -4,3 +4,6 @@ dist
 .dev.vars
 .env
 .env.local
+dist-ff
+tsconfig.tsbuildinfo
+.claude/
