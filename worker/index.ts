@@ -50,7 +50,8 @@ const localOrigins = new Set(["http://localhost:5173", "http://127.0.0.1:5173"])
 function isAllowedOrigin(origin: string, env: Env): boolean {
   if (localOrigins.has(origin)) return true;
   try {
-    return new URL(origin).hostname.endsWith(env.ALLOWED_ORIGIN_SUFFIX);
+    const host = new URL(origin).hostname;
+    return env.ALLOWED_ORIGIN_SUFFIX.split(",").some((s) => host.endsWith(s.trim()));
   } catch {
     return false;
   }

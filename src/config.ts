@@ -7,3 +7,4 @@ export const wsBaseUrl = apiBaseUrl.replace(/^http/, "ws");
 export const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID?.trim() ?? "";
 
 export const appName = import.meta.env.VITE_APP_NAME?.trim() || "F&F Chat";
+export const appTagline = "Friends & Family Chat";
