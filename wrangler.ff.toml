@@ -9,7 +9,7 @@ compatibility_flags = ["nodejs_compat"]
 [vars]
 APP_NAME = "F&F Chat"
 AI_NAME = "Buddy"
-ALLOWED_ORIGIN_SUFFIX = ".pages.dev"
+ALLOWED_ORIGIN_SUFFIX = ".pages.dev,ff-chat.stoaops.com"
 MAX_WORKSPACES = "20"
 MAX_MEMBERS_PER_WORKSPACE = "25"
 MAX_MESSAGES_PER_DAY = "500"

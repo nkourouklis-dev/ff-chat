@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { login } from "../services/api";
-import { appName } from "../config";
+import { appName, appTagline } from "../config";
 
 export default function Login() {
   const [name, setName] = useState("");
@@ -46,6 +46,7 @@ export default function Login() {
   return (
     <div className="flex min-h-dvh flex-col justify-center gap-5 p-6">
       <div>
+        <p className="mb-1 text-sm font-semibold uppercase tracking-wide text-liakos-500">💬 {appTagline}</p>
         <h1 className="text-4xl font-bold">{appName}</h1>
         <p className="mt-2 text-white/60">
           {isInvite
